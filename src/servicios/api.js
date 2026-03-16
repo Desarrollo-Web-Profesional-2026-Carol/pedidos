@@ -2,6 +2,8 @@ import axios from "axios";
 
 // Usar variable de entorno en Railway, o localhost para desarrollo
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+console.log("🔥 API_URL siendo usada:", API_URL); 
+
 
 const API = axios.create({
   baseURL: `${API_URL}/api/v1`
