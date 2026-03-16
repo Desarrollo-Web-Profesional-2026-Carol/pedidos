@@ -5,9 +5,14 @@ import API from "../servicios/api";
 const METODOS = ["Efectivo", "Transferencia", "Tarjeta", "Depósito"];
 
 const FORM_VACIO = {
-  nombre: "", telefono: "", direccion: "",
-  fecha_solicitud: "", fecha_envio: "",
-  total: "", pagado: [], comentario: ""
+  nombre: "", 
+  telefono: "", 
+  fecha_solicitud: "",
+  fecha_envio: "",
+  total: "", 
+  pagado: [], 
+  abono: "", 
+  comentario: ""
 };
 
 const s = {
@@ -27,9 +32,17 @@ const s = {
     borderRadius: "16px",
     padding: "2.5rem",
   },
-  label: { display: "block", marginBottom: "0.5rem" },
+  label: { 
+    display: "block", 
+    marginBottom: "0.5rem",
+    fontSize: "0.8rem",
+    fontWeight: 600,
+    letterSpacing: "0.03em",
+    textTransform: "uppercase",
+    color: "var(--color-muted)",
+  },
   grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" },
-  divider: { height: "1px", background: "var(--color-border)", margin: "0.5rem 0" },
+  divider: { height: "1px", background: "var(--color-border)", margin: "1rem 0" },
   checkLabel: (checked) => ({
     display: "flex",
     alignItems: "center",
@@ -94,6 +107,7 @@ function PedidoForm() {
           ...data,
           fecha_solicitud: data.fecha_solicitud?.slice(0, 10) || "",
           fecha_envio: data.fecha_envio?.slice(0, 10) || "",
+          abono: data.abono || "", 
         });
       } catch {
         alert("No se pudo cargar el pedido.");
@@ -119,7 +133,12 @@ function PedidoForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const body = { ...form, total: parseFloat(form.total) };
+      const body = { 
+        ...form, 
+        total: parseFloat(form.total) || 0,
+        abono: form.abono ? parseFloat(form.abono) : undefined 
+      };
+      
       if (esEdicion) {
         await API.patch(`/pedidos/${id}`, body);
         navigate(`/pedidos/${id}`);
@@ -127,7 +146,8 @@ function PedidoForm() {
         await API.post("/pedidos", body);
         navigate("/pedidos");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error al guardar:", error);
       alert("Error al guardar el pedido.");
     } finally {
       setLoading(false);
@@ -169,20 +189,27 @@ function PedidoForm() {
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
 
-          <div style={s.grid2}>
-            <div>
-              <label style={s.label}>Nombre</label>
-              <input name="nombre" value={form.nombre} onChange={handleChange} required placeholder="Juan García" />
-            </div>
-            <div>
-              <label style={s.label}>Teléfono</label>
-              <input name="telefono" value={form.telefono} onChange={handleChange} required maxLength="10" placeholder="4181234567" />
-            </div>
+          <div>
+            <label style={s.label}>Nombre *</label>
+            <input 
+              name="nombre" 
+              value={form.nombre} 
+              onChange={handleChange} 
+              required 
+              placeholder="Juan García" 
+            />
           </div>
 
           <div>
-            <label style={s.label}>Dirección</label>
-            <input name="direccion" value={form.direccion} onChange={handleChange} required placeholder="Calle, Colonia, Ciudad" />
+            <label style={s.label}>Teléfono *</label>
+            <input 
+              name="telefono" 
+              value={form.telefono} 
+              onChange={handleChange} 
+              required 
+              maxLength="10" 
+              placeholder="4181234567" 
+            />
           </div>
 
           <div style={s.divider} />
@@ -197,6 +224,7 @@ function PedidoForm() {
                     value={metodo}
                     checked={form.pagado.includes(metodo)}
                     onChange={handlePagadoChange}
+                    style={{ margin: 0 }}
                   />
                   {metodo}
                 </label>
@@ -208,23 +236,65 @@ function PedidoForm() {
 
           <div style={s.grid2}>
             <div>
-              <label style={s.label}>Fecha de solicitud</label>
-              <input type="date" name="fecha_solicitud" value={form.fecha_solicitud} onChange={handleChange} required />
+              <label style={s.label}>Fecha de solicitud *</label>
+              <input 
+                type="date" 
+                name="fecha_solicitud" 
+                value={form.fecha_solicitud} 
+                onChange={handleChange} 
+                required 
+              />
             </div>
             <div>
-              <label style={s.label}>Fecha de envío</label>
-              <input type="date" name="fecha_envio" value={form.fecha_envio} onChange={handleChange} required />
+              <label style={s.label}>Fecha de envío *</label>
+              <input 
+                type="date" 
+                name="fecha_envio" 
+                value={form.fecha_envio} 
+                onChange={handleChange} 
+                required 
+              />
             </div>
           </div>
 
-          <div>
-            <label style={s.label}>Total (MXN)</label>
-            <input type="number" name="total" value={form.total} onChange={handleChange} required min="0" step="0.01" placeholder="0.00" />
+          <div style={s.grid2}>
+            <div>
+              <label style={s.label}>Total (MXN) *</label>
+              <input 
+                type="number" 
+                name="total" 
+                value={form.total} 
+                onChange={handleChange} 
+                required 
+                min="0" 
+                step="0.01" 
+                placeholder="0.00" 
+              />
+            </div>
+            <div>
+              <label style={s.label}>Abono (MXN)</label>
+              <input 
+                type="number" 
+                name="abono" 
+                value={form.abono} 
+                onChange={handleChange} 
+                min="0" 
+                step="0.01" 
+                placeholder="0.00" 
+              />
+            </div>
           </div>
 
           <div>
             <label style={s.label}>Comentario</label>
-            <textarea name="comentario" value={form.comentario} onChange={handleChange} rows="3" placeholder="Notas adicionales..." style={{ resize: "vertical" }} />
+            <textarea 
+              name="comentario" 
+              value={form.comentario} 
+              onChange={handleChange} 
+              rows="3" 
+              placeholder="Notas adicionales..." 
+              style={{ resize: "vertical" }} 
+            />
           </div>
 
           <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>

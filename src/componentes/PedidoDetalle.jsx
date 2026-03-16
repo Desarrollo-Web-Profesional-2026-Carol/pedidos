@@ -148,6 +148,8 @@ function PedidoDetalle() {
 
   if (!pedido) return null;
 
+  const saldoPendiente = (pedido.total || 0) - (pedido.abono || 0);
+
   return (
     <div style={s.page}>
       <div style={s.container} className="fade-up">
@@ -159,13 +161,13 @@ function PedidoDetalle() {
               onClick={() => navigate("/pedidos")}
               style={{ ...s.btnGhost, marginBottom: "0.8rem", fontSize: "0.78rem" }}
             >
-              Volver a pedidos
+              ← Volver a pedidos
             </button>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.8rem", fontWeight: 700, color: "var(--color-text)", lineHeight: 1.1 }}>
               {pedido.nombre}
             </h2>
             <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.72rem", color: "var(--color-muted)", marginTop: "0.3rem" }}>
-              {pedido._id}
+              ID: {pedido._id}
             </p>
           </div>
           <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
@@ -180,10 +182,22 @@ function PedidoDetalle() {
 
         {/* Total destacado */}
         <div style={{ ...s.card, borderColor: "rgba(201,168,76,0.2)", background: "rgba(201,168,76,0.04)", marginBottom: "1rem" }}>
-          <p style={s.fieldLabel}>Total del pedido</p>
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.2rem", fontWeight: 700, color: "var(--color-accent)" }}>
-            {formatDinero(pedido.total)}
-          </p>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+            <p style={s.fieldLabel}>Total del pedido</p>
+            {pedido.abono > 0 && (
+              <p style={s.fieldLabel}>Saldo pendiente</p>
+            )}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.2rem", fontWeight: 700, color: "var(--color-accent)" }}>
+              {formatDinero(pedido.total)}
+            </p>
+            {pedido.abono > 0 && (
+              <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "1.2rem", color: saldoPendiente > 0 ? "#e57373" : "var(--color-muted)" }}>
+                {formatDinero(saldoPendiente)}
+              </p>
+            )}
+          </div>
           {(pedido.pagado || []).length > 0 && (
             <div style={{ marginTop: "0.8rem" }}>
               {pedido.pagado.map((m) => <span key={m} style={s.tag}>{m}</span>)}
@@ -195,9 +209,11 @@ function PedidoDetalle() {
         <div style={s.card}>
           <div style={s.grid2}>
             <Campo label="Teléfono" valor={pedido.telefono} mono />
-            <Campo label="Dirección" valor={pedido.direccion} />
             <Campo label="Fecha de solicitud" valor={formatFecha(pedido.fecha_solicitud)} />
             <Campo label="Fecha de envío" valor={formatFecha(pedido.fecha_envio)} />
+            {pedido.abono > 0 && (
+              <Campo label="Abono" valor={formatDinero(pedido.abono)} mono />
+            )}
           </div>
         </div>
 

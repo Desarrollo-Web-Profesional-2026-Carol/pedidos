@@ -122,18 +122,29 @@ function PedidosList() {
     setLoading(true);
     try {
       const params = {};
-      if (busqueda) params.nombre = busqueda;
-      else if (filtroPagado) params.pagado = filtroPagado;
+      
+
+      if (busqueda) {
+        params.nombre = busqueda;
+      }
+      
+      if (filtroPagado) {
+        params.pagado = filtroPagado;
+      }
+      
       const { data } = await API.get("/pedidos", { params });
       setPedidos(data);
-    } catch {
+    } catch (error) {
+      console.error("Error al cargar pedidos:", error);
       setPedidos([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { cargarPedidos(); }, [busqueda, filtroPagado]);
+  useEffect(() => { 
+    cargarPedidos(); 
+  }, [busqueda, filtroPagado]);
 
   const handleEliminar = async (e, pedido) => {
     e.stopPropagation();
@@ -177,20 +188,29 @@ function PedidosList() {
           </button>
         </div>
 
-        {/* Filtros */}
+        {/* Filtros - CORREGIDO */}
         <div style={s.filters}>
           <div style={s.filterInput}>
             <input
               type="text"
               placeholder="Buscar por nombre..."
               value={busqueda}
-              onChange={(e) => { setBusqueda(e.target.value); setFiltroPagado(""); }}
+
+
+              
+              onChange={(e) => { 
+                setBusqueda(e.target.value); 
+                setFiltroPagado(""); 
+              }}
             />
           </div>
           <select
             value={filtroPagado}
-            onChange={(e) => { setFiltroPagado(e.target.value); setBusqueda(""); }}
-            style={{ width: "auto" }}
+            onChange={(e) => { 
+              setFiltroPagado(e.target.value); 
+              setBusqueda(""); 
+            }}
+            style={{ width: "auto", minWidth: "180px" }}
           >
             <option value="">Todos los métodos</option>
             {METODOS.map((m) => <option key={m} value={m}>{m}</option>)}
@@ -221,7 +241,7 @@ function PedidosList() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead style={s.thead}>
                 <tr>
-                  {["Nombre", "Teléfono", "Fecha envío", "Total", "Pago", ""].map((h) => (
+                  {["Nombre", "Teléfono", "Fecha envío", "Total", "Abono", "Pago", ""].map((h) => (
                     <th key={h} style={s.th}>{h}</th>
                   ))}
                 </tr>
@@ -246,6 +266,9 @@ function PedidosList() {
                     </td>
                     <td style={{ ...s.td, color: "var(--color-accent)", fontWeight: 700, fontFamily: "'DM Mono', monospace", borderBottom: i === pedidos.length - 1 ? "none" : undefined }}>
                       {formatDinero(p.total)}
+                    </td>
+                    <td style={{ ...s.td, color: "var(--color-muted)", fontFamily: "'DM Mono', monospace", borderBottom: i === pedidos.length - 1 ? "none" : undefined }}>
+                      {p.abono ? formatDinero(p.abono) : "—"}
                     </td>
                     <td style={{ ...s.td, borderBottom: i === pedidos.length - 1 ? "none" : undefined }}>
                       {(p.pagado || []).map((m) => <span key={m} style={s.tag}>{m}</span>)}
