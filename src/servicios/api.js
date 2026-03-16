@@ -1,7 +1,10 @@
 import axios from "axios";
 
+// Usar variable de entorno en Railway, o localhost para desarrollo
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 const API = axios.create({
-  baseURL: "http://localhost:3001/api/v1"
+  baseURL: `${API_URL}/api/v1`
 });
 
 // Interceptor: agrega el token JWT a cada request si existe
